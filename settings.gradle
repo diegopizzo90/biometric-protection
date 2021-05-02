@@ -1,0 +1,3 @@
+include ':biometricprotection'
+include ':app'
+rootProject.name = "Biometric Protection"
