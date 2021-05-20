@@ -33,6 +33,12 @@ class MainActivity : AppCompatActivity() {
                     this, executor, encryptedData,
                     onSuccess = { textDecrypted ->
                         viewModel.onBiometricVerificationPassed(textDecrypted)
+                    },
+                    onNoBiometricsEnrolled = {
+                        showDialog(
+                            R.string.dialog_decrypt_error_title,
+                            R.string.dialog_decrypt_error_message
+                        ) { finish() }
                     })
             }
         }
@@ -46,31 +52,40 @@ class MainActivity : AppCompatActivity() {
         binding.editTextTextMultiLine.setText(encryptedData.textEncrypted.toString())
         binding.encryptButton.isEnabled = false
         binding.decryptButton.isEnabled = true
+        binding.textView.text = getString(R.string.text_encrypted)
+        binding.editTextTextMultiLine.isEnabled = false
     }
 
     private fun onDataDecrypted(textDecrypted: String) {
         binding.editTextTextMultiLine.setText(textDecrypted)
         binding.encryptButton.isEnabled = true
         binding.decryptButton.isEnabled = false
+        binding.textView.text = getString(R.string.text_decrypted)
+        binding.editTextTextMultiLine.isEnabled = true
     }
 
-    private fun showDialog(messageRes: Int, onButtonClick: () -> Unit) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_error_title)
-            .setMessage(messageRes)
-            .setPositiveButton(R.string.dialog_error_title) { _, _ -> onButtonClick() }
+    private fun showDialog(
+        titleRes: Int = R.string.dialog_error_title,
+        messageRes: Int,
+        onButtonClick: () -> Unit
+    ) {
+        AlertDialog.Builder(this).apply {
+            setTitle(titleRes)
+            setMessage(messageRes)
+            setPositiveButton(R.string.dialog_button_text) { _, _ -> onButtonClick() }
+        }.show()
     }
 
     private fun observeViewState() {
         viewModel.liveData.observe(this, {
             when (it) {
                 ViewState.BiometricNotUsable -> {
-                    showDialog(R.string.dialog_encrypt_error_biometric_not_usable) { finish() }
+                    showDialog(messageRes = R.string.dialog_encrypt_error_biometric_not_usable) { finish() }
                 }
                 is ViewState.OnDataDecryptedSuccess -> onDataDecrypted(it.dataDecrypted)
                 is ViewState.OnDataEncryptedSuccess -> onDataEncrypted(it.encryptedData)
                 ViewState.OnDataEncryptedError -> {
-                    showDialog(R.string.dialog_encrypt_error_message) { finish() }
+                    showDialog(messageRes = R.string.dialog_encrypt_error_message) { finish() }
                 }
             }
         })

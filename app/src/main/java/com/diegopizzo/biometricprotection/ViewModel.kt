@@ -32,10 +32,14 @@ class ViewModel(private val biometricProtection: IBiometricProtectionManager) : 
 
     fun showAuthenticationPrompt(
         fragmentActivity: FragmentActivity, executor: Executor,
-        encryptedData: EncryptedData, onSuccess: (String) -> Unit
+        encryptedData: EncryptedData, onSuccess: (String) -> Unit,
+        onNoBiometricsEnrolled: () -> Unit
     ) {
         biometricProtection.showAuthenticationPrompt(
-            setUpPrompt(fragmentActivity, executor, encryptedData, onSuccess),
+            setUpBiometricPrompt(
+                fragmentActivity, executor, encryptedData, onSuccess,
+                onNoBiometricsEnrolled
+            ),
             setUpPromptInfo(),
             encryptedData.initVector
         )
@@ -52,12 +56,14 @@ class ViewModel(private val biometricProtection: IBiometricProtectionManager) : 
         )
     }
 
-    private fun setUpPrompt(
+    private fun setUpBiometricPrompt(
         fragmentActivity: FragmentActivity, executor: Executor,
-        encryptedData: EncryptedData, onSuccess: (String) -> Unit
+        encryptedData: EncryptedData, onSuccess: (String) -> Unit,
+        onNoBiometricsEnrolled: () -> Unit
     ): BiometricPrompt {
         return biometricProtection.createBiometricPromptListener(
-            fragmentActivity, executor, encryptedData, onSuccess, promptInfo = setUpPromptInfo()
+            fragmentActivity, executor, encryptedData, onSuccess,
+            onNoBiometricsEnrolled = onNoBiometricsEnrolled
         )
     }
 }

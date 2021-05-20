@@ -1,13 +1,16 @@
 <resources>
     <string name="app_name">Biometric Protection</string>
-    <string name="change_this_text">Change this text:</string>
+    <string name="text_decrypted">Text decrypted:</string>
+    <string name="text_encrypted">Text encrypted:</string>
+    <string name="encrypt">Encrypt Text</string>
+    <string name="decrypt">Decrypt Text</string>
     <string name="write_some_text_and_then_click_encrypt">Write some text and then click encrypt!</string>
-    <string name="encrypt_text">Encrypt text</string>
-    <string name="decrypt_text">Decrypt text</string>
     <string name="biometric_prompt_title">Unlock!</string>
     <string name="biometric_prompt_negative_button">Cancel</string>
     <string name="dialog_error_title">Error!</string>
     <string name="dialog_encrypt_error_message">Error during text encryption</string>
-    <string name="dialog_button_text">Ok</string>
+    <string name="dialog_button_text">OK</string>
     <string name="dialog_encrypt_error_biometric_not_usable">Biometric is not usable for your device</string>
+    <string name="dialog_decrypt_error_title">No biometrics enrolled!</string>
+    <string name="dialog_decrypt_error_message">Please set up your biometric in settings</string>
 </resources>
