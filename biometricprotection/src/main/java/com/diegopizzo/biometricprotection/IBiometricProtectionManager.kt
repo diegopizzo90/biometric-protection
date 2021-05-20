@@ -41,8 +41,9 @@ interface IBiometricProtectionManager {
      * @param fragmentActivity Android FragmentActivity
      * @param executor Object used to execute the authentication on new thread
      * @param onSuccess Function executed in the [BiometricPrompt.AuthenticationCallback.onAuthenticationSucceeded] callback
-     * @param onNegativeButtonClicked Function executed in the [BiometricPrompt.AuthenticationCallback.onAuthenticationError] callback when the user click on negative button
+     * @param onNegativeButtonClicked Function executed in the [BiometricPrompt.AuthenticationCallback.onAuthenticationError] callback when user click on negative button
      * @param onFailed Function executed in the [BiometricPrompt.AuthenticationCallback.onAuthenticationFailed] callback
+     * @param onNoBiometricsEnrolled Function executed in the [BiometricPrompt.AuthenticationCallback.onAuthenticationError] callback when user doesn't enrolled any biometrics
      */
     fun createBiometricPromptListener(
         fragmentActivity: FragmentActivity,
@@ -51,7 +52,7 @@ interface IBiometricProtectionManager {
         onSuccess: (String) -> Unit,
         onNegativeButtonClicked: (() -> Unit)? = null,
         onFailed: (() -> Unit)? = null,
-        promptInfo: BiometricPrompt.PromptInfo
+        onNoBiometricsEnrolled: (() -> Unit)? = null
     ): BiometricPrompt
 
     /**

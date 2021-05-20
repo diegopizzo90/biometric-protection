@@ -7,8 +7,7 @@ import android.security.keystore.KeyProperties
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
-import androidx.biometric.BiometricPrompt.ERROR_NEGATIVE_BUTTON
-import androidx.biometric.BiometricPrompt.ERROR_USER_CANCELED
+import androidx.biometric.BiometricPrompt.*
 import androidx.fragment.app.FragmentActivity
 import com.diegopizzo.biometricprotection.IBiometricProtectionManager.EncryptedData
 import java.nio.charset.Charset
@@ -41,8 +40,8 @@ internal class BiometricProtectionManager(private val context: Context) :
     override fun buildBiometricPromptInfo(
         titleRes: Int, subtitleRes: Int?,
         descriptionRes: Int?, negativeButtonTextRes: Int
-    ): BiometricPrompt.PromptInfo {
-        return BiometricPrompt.PromptInfo.Builder()
+    ): PromptInfo {
+        return PromptInfo.Builder()
             .setTitle(context.getString(titleRes))
             .setSubtitle(subtitleRes?.let { context.getString(it) })
             .setDescription(descriptionRes?.let { context.getString(it) })
@@ -54,7 +53,7 @@ internal class BiometricProtectionManager(private val context: Context) :
         fragmentActivity: FragmentActivity, executor: Executor,
         encryptedData: EncryptedData, onSuccess: (String) -> Unit,
         onNegativeButtonClicked: (() -> Unit)?, onFailed: (() -> Unit)?,
-        promptInfo: BiometricPrompt.PromptInfo
+        onNoBiometricsEnrolled: (() -> Unit)?
     ): BiometricPrompt {
         return BiometricPrompt(fragmentActivity, executor,
             object : BiometricPrompt.AuthenticationCallback() {
@@ -64,12 +63,18 @@ internal class BiometricProtectionManager(private val context: Context) :
                     //has completed without success, then this callback will be triggered
                     super.onAuthenticationError(errorCode, errString)
                     //Run the callback when the user click on the negative button
-                    if (errorCode == ERROR_NEGATIVE_BUTTON || errorCode == ERROR_USER_CANCELED) {
-                        fragmentActivity.runOnUiThread { onNegativeButtonClicked?.let { it() } }
+                    when(errorCode) {
+                        ERROR_NEGATIVE_BUTTON, ERROR_USER_CANCELED -> {
+                            fragmentActivity.runOnUiThread { onNegativeButtonClicked?.invoke() }
+                        }
+                        ERROR_NO_BIOMETRICS -> {
+                            fragmentActivity.runOnUiThread { onNoBiometricsEnrolled?.invoke() }
+                        }
+                        else -> return
                     }
                 }
 
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                override fun onAuthenticationSucceeded(result: AuthenticationResult) {
                     //The fingerprint/iris/face is has been successfully matched with one of the fingerprints/iris/faces registered on the device
                     super.onAuthenticationSucceeded(result)
                     try {
@@ -91,11 +96,11 @@ internal class BiometricProtectionManager(private val context: Context) :
 
     override fun showAuthenticationPrompt(
         biometricPrompt: BiometricPrompt,
-        promptInfo: BiometricPrompt.PromptInfo,
+        promptInfo: PromptInfo,
         initVector: ByteArray
     ) {
         val cipher = prepareDecryptCipher(initVector)
-        biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
+        biometricPrompt.authenticate(promptInfo, CryptoObject(cipher))
     }
 
     private fun encryptInformation(stringToEncrypt: String): EncryptedData {
