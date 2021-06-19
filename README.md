@@ -5,6 +5,8 @@ Biometric protection is a simple app that implements [Android Biometric library]
 One method of protecting sensitive information which makes it possible authorize the user with fingerprint, iris, face-id and any others biometric credential to access protected data.
 This library uses the default unlock method enabled in the device settings.
 
+<img src="https://img.shields.io/badge/API-23%2B-orange" style="max-width:100%;" alt="API" data-canonical-src="https://img.shields.io/badge/API-23%2B-orange" style="max-width:100%;">
+
 # App structure
 The application is composed by two modules:
 - **App** module include a simple UI to encrypt and decrypt a simple text. In order to decrypt and access to protected data is shown a biometric authentication dialog. After the user authenticates successfully using a biometric prompt, it is possible to perform a cryptographic operation and encrypt a text string.
