@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewState() {
-        viewModel.liveData.observe(this, {
+        viewModel.liveData.observe(this) {
             when (it) {
                 ViewState.BiometricNotUsable -> {
                     showDialog(messageRes = R.string.dialog_encrypt_error_biometric_not_usable) { finish() }
@@ -88,6 +88,6 @@ class MainActivity : AppCompatActivity() {
                     showDialog(messageRes = R.string.dialog_encrypt_error_message) { finish() }
                 }
             }
-        })
+        }
     }
 }
