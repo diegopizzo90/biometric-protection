@@ -1,24 +1,27 @@
 package com.diegopizzo.biometricprotection
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.diegopizzo.biometricprotection.IBiometricProtectionManager.EncryptedData
 import com.diegopizzo.biometricprotection.databinding.ActivityMainBinding
-import org.koin.android.viewmodel.ext.android.viewModel
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.Executors
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val viewModel: ViewModel by viewModel()
+    private val viewModel: ViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         observeViewState()
+        viewModel.checkIfBiometricIsUsable(this)
         setClickListeners()
         encrypt()
     }
@@ -39,7 +42,8 @@ class MainActivity : AppCompatActivity() {
                             R.string.dialog_decrypt_error_title,
                             R.string.dialog_decrypt_error_message
                         ) { finish() }
-                    })
+                    }, this
+                )
             }
         }
     }

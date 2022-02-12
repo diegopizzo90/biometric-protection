@@ -1,7 +1,6 @@
 package com.diegopizzo.biometricprotection
 
 import android.content.Context
-import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.biometric.BiometricManager
@@ -20,12 +19,11 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 
-internal class BiometricProtectionManager(private val context: Context) :
-    IBiometricProtectionManager {
+internal class BiometricProtectionManager : IBiometricProtectionManager {
 
-    override fun isBiometricUsable(): Boolean {
-        return BiometricManager.from(context)
-            .canAuthenticate(DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+    override fun isBiometricUsable(androidContext: Context): Boolean {
+        return BiometricManager.from(androidContext)
+            .canAuthenticate(DEVICE_CREDENTIAL) == BiometricManager.BIOMETRIC_SUCCESS
     }
 
     override fun biometricAuthenticationEnrollment(dataToEncrypt: String): EncryptedData? {
@@ -39,7 +37,7 @@ internal class BiometricProtectionManager(private val context: Context) :
 
     override fun buildBiometricPromptInfo(
         titleRes: Int, subtitleRes: Int?,
-        descriptionRes: Int?, negativeButtonTextRes: Int
+        descriptionRes: Int?, negativeButtonTextRes: Int, context: Context
     ): PromptInfo {
         return PromptInfo.Builder()
             .setTitle(context.getString(titleRes))
@@ -63,7 +61,7 @@ internal class BiometricProtectionManager(private val context: Context) :
                     //has completed without success, then this callback will be triggered
                     super.onAuthenticationError(errorCode, errString)
                     //Run the callback when the user click on the negative button
-                    when(errorCode) {
+                    when (errorCode) {
                         ERROR_NEGATIVE_BUTTON, ERROR_USER_CANCELED -> {
                             fragmentActivity.runOnUiThread { onNegativeButtonClicked?.invoke() }
                         }

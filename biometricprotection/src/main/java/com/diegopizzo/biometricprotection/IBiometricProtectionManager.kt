@@ -11,9 +11,10 @@ interface IBiometricProtectionManager {
 
     /**
      * Check if the biometric authentication is available
+     * @param androidContext
      * @see [androidx.biometric.BiometricManager.canAuthenticate]
      */
-    fun isBiometricUsable(): Boolean
+    fun isBiometricUsable(androidContext: Context): Boolean
 
     /**
      * Setup of biometric authentication and the encryption mechanism to protect the pass-code
@@ -33,7 +34,8 @@ interface IBiometricProtectionManager {
         titleRes: Int,
         subtitleRes: Int? = null,
         descriptionRes: Int? = null,
-        negativeButtonTextRes: Int
+        negativeButtonTextRes: Int,
+        context: Context
     ): BiometricPrompt.PromptInfo
 
     /**
@@ -74,8 +76,7 @@ interface IBiometricProtectionManager {
 
 /**
  * Get BiometricProtectionManager instance
- * @param androidContext
  */
-fun getBiometricProtectionInstance(androidContext: Context): IBiometricProtectionManager {
-    return BiometricProtectionManager(androidContext)
+fun getBiometricProtectionInstance(): IBiometricProtectionManager {
+    return BiometricProtectionManager()
 }

@@ -1,23 +1,26 @@
 package com.diegopizzo.biometricprotection
 
+import android.content.Context
 import androidx.biometric.BiometricPrompt
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.diegopizzo.biometricprotection.IBiometricProtectionManager.EncryptedData
 import com.diegopizzo.biometricprotection.ViewState.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.concurrent.Executor
+import javax.inject.Inject
 
-class ViewModel(private val biometricProtection: IBiometricProtectionManager) : ViewModel() {
+@HiltViewModel
+class ViewModel @Inject constructor(private val biometricProtection: IBiometricProtectionManager) :
+    ViewModel() {
 
     private val mutableLiveData: MutableLiveData<ViewState> = MutableLiveData()
     val liveData = mutableLiveData
     var encryptedData: EncryptedData? = null
 
-    init {
-        if (biometricProtection.isBiometricUsable()) {
-            mutableLiveData.value = BiometricUsable
-        } else {
+    fun checkIfBiometricIsUsable(context: Context) {
+        if (!biometricProtection.isBiometricUsable(context)) {
             mutableLiveData.value = BiometricNotUsable
         }
     }
@@ -33,14 +36,15 @@ class ViewModel(private val biometricProtection: IBiometricProtectionManager) : 
     fun showAuthenticationPrompt(
         fragmentActivity: FragmentActivity, executor: Executor,
         encryptedData: EncryptedData, onSuccess: (String) -> Unit,
-        onNoBiometricsEnrolled: () -> Unit
+        onNoBiometricsEnrolled: () -> Unit,
+        context: Context
     ) {
         biometricProtection.showAuthenticationPrompt(
             setUpBiometricPrompt(
                 fragmentActivity, executor, encryptedData, onSuccess,
                 onNoBiometricsEnrolled
             ),
-            setUpPromptInfo(),
+            setUpPromptInfo(context),
             encryptedData.initVector
         )
     }
@@ -49,10 +53,11 @@ class ViewModel(private val biometricProtection: IBiometricProtectionManager) : 
         liveData.value = OnDataDecryptedSuccess(plainText)
     }
 
-    private fun setUpPromptInfo(): BiometricPrompt.PromptInfo {
+    private fun setUpPromptInfo(context: Context): BiometricPrompt.PromptInfo {
         return biometricProtection.buildBiometricPromptInfo(
             titleRes = R.string.biometric_prompt_title,
-            negativeButtonTextRes = R.string.biometric_prompt_negative_button
+            negativeButtonTextRes = R.string.biometric_prompt_negative_button,
+            context = context
         )
     }
 
@@ -69,7 +74,6 @@ class ViewModel(private val biometricProtection: IBiometricProtectionManager) : 
 }
 
 sealed class ViewState {
-    object BiometricUsable : ViewState()
     object BiometricNotUsable : ViewState()
     class OnDataEncryptedSuccess(val encryptedData: EncryptedData) : ViewState()
     object OnDataEncryptedError : ViewState()
